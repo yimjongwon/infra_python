@@ -1,0 +1,10 @@
+name: 이정호
+addr: 노량진
+foods: 
+  - 맥주
+  - 치킨
+isMan: true
+body:
+  weight: 75
+  height: 175
+  

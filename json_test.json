@@ -1,0 +1,10 @@
+{
+    "name":"임종원",
+    "addr":"경기도",
+    "foods":["맥주","치킨"],
+    "isMan":true,
+    "body":{
+        "weight":75,
+        "height":175
+    }
+}
