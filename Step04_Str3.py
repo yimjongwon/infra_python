@@ -22,7 +22,7 @@ body:
 # 다시 dict에 있는 내용을 이용해서 yaml 문자열 형식으로 변환해보세요.
 
 result = yaml.safe_load(info)
-print(result)
+print(type(result))
 print(result["name"])
 print(result["addr"])
 print(result["foods"])
@@ -34,7 +34,7 @@ print(result["body"]["weight"])
 print(result["body"]["height"])
 
 result2 = yaml.safe_dump(result)
-print(result2)
+print(type(result2))
 print("종료")
 
 
