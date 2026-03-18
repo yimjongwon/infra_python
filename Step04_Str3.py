@@ -33,7 +33,7 @@ print(result["body"]["weight"])
 print(result["body"]["height"])
 
 result2 = yaml.safe_dump(result)
-
+print(result2)
 print("종료")
 
 
