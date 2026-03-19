@@ -22,5 +22,6 @@ num: int = 10
 names: list = [10, 20, 30]
 
 def test():
+    print("pass테스트")
     pass
 ```
