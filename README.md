@@ -6,3 +6,8 @@
 ```bash
 git clone ....
 cd ...
+git log --oneline
+git fetch origin master
+git switch origin/master -- detach
+git switch master
+git merge origin/master
