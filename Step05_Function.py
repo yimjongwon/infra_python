@@ -36,4 +36,12 @@ def print_info(name: str, addr: str):
 print_info("김구라","노량진")
 print_info(addr="행신동", name="해골")
 
+def get_sum(num1: int, num2: int):
+    sum= num1+num2
+    return sum
+result2 = get_sum(10, 20)
+
+print(result2)
+
+
 print("종료")
