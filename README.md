@@ -14,3 +14,13 @@ git merge origin/master
 git remote add origin 원격저장소위치
 git remote -v 원격저장소 목록
 gir push origin master
+```
+
+## Sample code ...
+```python
+num: int = 10
+names: list = [10, 20, 30]
+
+def test():
+    pass
+```
