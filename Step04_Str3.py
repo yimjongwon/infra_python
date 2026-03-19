@@ -33,7 +33,7 @@ print(result["body"])
 print(result["body"]["weight"])
 print(result["body"]["height"])
 
-result2 = yaml.safe_dump(result, allow_unicode=True, sort_keys=False)
+result2 = yaml.dump(result, allow_unicode=True, sort_keys=False)
 print(result2)
 print("종료")
 
