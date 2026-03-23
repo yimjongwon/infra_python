@@ -1,1 +1,0 @@
-int(input_value, 2)
