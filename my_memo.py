@@ -42,6 +42,9 @@ https://github.com/oli999/infra_python
 snippet : 커맨드 설정
 -https://snippet-generator.app/?description=&tabtrigger=&snippet=&mode=vscode
 
+cisco packet tracer
+https://www.netacad.com/launch?id=ec0847b7-e6fc-4597-bc31-38ddd6b07a2f&tab=curriculum&view=b0e094c5-ca1f-59f9-9bcb-e44ea6a1dcbb
+
 설치 정리
 pip install pyyaml
 pip install jinja2
@@ -51,6 +54,29 @@ from jinja2 import Environment, FileSystemLoader, Template
 
 import tkinter as tk
 from tkinter import messagebox
+
+# 현재 디렉토리의 내용확인
+ls -l
+
+# yum 페키지 메니저를 이용해서 httpd  서버 설치
+yum   install  -y  httpd
+
+# httpd 서버 시작
+systemctl  start  httpd
+
+#재부팅 되어도 자동 시작되도록
+systemctl  enable httpd 
+
+# 웹서버가 동작하는지 확인
+curl  http://localhost
+
+# 외부 window 에서 chrome 을 실행해서  http://172.16.8.101:80 으로 접속하면 
+# 방화벽(firewall) 때문에 접속이 불가하다 
+# 방화벽을 내려 보자
+systemctl  stop  firewalld
+systemctl  disable  firewalld  # 재부팅 했을때도 내려 가도록 
+
+import os
 
 
 '''
