@@ -1,0 +1,7 @@
+###########
+num=1
+name=kim lee park
+###########
+SELINUX=disabled text=aaa aaa=bbb
+###########
+addr=seoul
