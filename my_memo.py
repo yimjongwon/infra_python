@@ -226,11 +226,46 @@ ssh-keygen -q -N "" -f test_key.pem: 공개키, 개인키 두개 생성
 -rw-r--r--    1 root root  566 Mar 27 15:10 test_key.pem.pub
 chmod  700  ~/.ssh
 chmod  600  ~/.ssh/authorized_keys
-# scp 를 이용해서 파일 전송
-
-# scp   대상파일   계정@ip : 경로 
-scp  ./memo.txt   root@172.16.8.102:~/ 
 ```
+=================================================================================
+
+[ testvm1 에서 testvm2 로 접속해서 작업하기 ]
+
+# 비밀번호를 이용해서 접속 
+# ssh 계정@ip 주소
+ssh  root@172.16.8.102
+
+# pem 파일을 이용해서 접속
+# ssh  -i  pem파일의위치   계정@ip주소
+ssh  -i   .~/xxx.pem   root@172.16.8.102
+
+# scp 를 이용해서 파일 전송 (비밀번호 입력 필요)
+# scp   대상파일   계정@ip : 경로 
+
+scp  ./memo.txt   root@172.16.8.102:~/ 
+scp  ./memo.txt   root@testvm2:~/ 
+
+
+# scp 를 이용해서 파일 전송 (pem 파일 이용)
+# scp  -i  pem파일의위치   대상파일   계정@ip : 경로 
+
+scp  -i   .~/xxx.pem   ./memo.txt   root@172.16.8.102:~/ 
+scp   -i   .~/xxx.pem  ./memo.txt   root@testvm2:~/ 
+
+==============================================================================
+호스트명 정리
+cat /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+ vi /etc/hosts
+[root@testvm1 ~]# cat /etc/hosts
+127.0.0.1   localhost testvm1
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+172.16.8.102 testvm2
+
+[root@testvm1 ~]# exec bash
+
 ======================================================================================
 
 -데이터베이스 정리
