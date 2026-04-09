@@ -65,4 +65,18 @@ pip  install  fastapi  uvicorn  jinja2
 pip  freeze  >  requirements.txt
 # fastapi  서버실행
 uvicorn  main:app  --host  0.0.0.0  --port  8000
+
+=============================================
+nginx 설치
+sudo  dnf  install  nginx -y 
+# 지금 바로 시작
+sudo systemctl start nginx
+
+# 서버가 재부팅 될때 자동으로 시작 되도록 설정
+sudo systemctl enable nginx
+
+# 테스트로 실제 80 port 에서 응답하는지 확인 
+curl http://localhost:80
+
+
 '''

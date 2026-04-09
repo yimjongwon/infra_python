@@ -63,4 +63,53 @@ cat /etc/hosts
 172.16.8.102 testvm2
 
 [root@testvm1 ~]# exec bash
+================================================================================
+mgmt, rocky01, rocky02을 활용한 Ansible 환경 구성(26.04_09)
+
+mgmt: 관리용서버, 개인키(ansiblekey.pem)
+rocky01: 공개키(ansiblekey.pem.pub)
+rocky02: 공개키(ansiblekey.pem.pub)
+
+호스트네임 rocky01에서 rocky02로 변경
+[user1@rocky01 ~]$ sudo hostnamectl set-hostname rocky02
+                    sudo hostname rocky02
+
+[user1@mgmt ~]$ ssh-keygen -q -N "" -f ~/.ssh/ansiblekey.pem
+-q	Quiet
+-N ""  비밀번호 빈값설정
+-f 파일경로
+
+rocky01에 pub전달
+[user1@mgmt ~]$ ssh-copy-id -i ~/.ssh/ansiblekey.pem.pub user1@172.16.1.201
+rocky02에 pub전달
+[user1@mgmt ~]$ ssh-copy-id -i ~/.ssh/ansiblekey.pem.pub user1@172.16.1.202
+
+[user1@rocky01 ~]$ ls -al ~/.ssh/
+total 4
+drwx------  2 user1 user1  29 Apr  9 17:16 .
+drwx------. 6 user1 user1 154 Apr  9 17:16 ..
+-rw-------  1 user1 user1 564 Apr  9 17:16 authorized_keys
+[user1@rocky02 ~]$ ls ~/.ssh/ -al
+total 4
+drwx------  2 user1 user1  29 Apr  9 17:22 .
+drwx------. 6 user1 user1 175 Apr  9 17:22 ..
+-rw-------  1 user1 user1 564 Apr  9 17:22 authorized_keys
+
+[user1@mgmt ~]$ cat <<EOF > ~/.ssh/config
+> HOST *
+>   User user1
+>   IdentityFile ~/.ssh/ansiblekey.pem
+>   StrictHostKeyChecking no   :접속할때 accept 안물어보는 설정
+> EOF
+
+config 폴더 권한 낮추기
+[user1@mgmt ~]$ chmod 600 ~/.ssh/config
+
+-ssh로 접속해서 hostname 물어보는 명령어
+[user1@mgmt ~]$ ssh 172.16.1.201 hostname
+rocky01    -> 설정 되었으면 비밀번호 안물어보고 나와야한다
+[user1@mgmt ~]$ ssh 172.16.1.202 hostname
+rocky02    -> 설정 되었으면 비밀번호 안물어보고 나와야한다
+
+
 '''

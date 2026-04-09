@@ -8,5 +8,8 @@ python -m venv venv
 -리눅스
 source venv/bin/activate
 
+가상환경 빠져나오기
+deactivate
+
 
 '''
