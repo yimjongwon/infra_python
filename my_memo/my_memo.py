@@ -106,6 +106,7 @@ sudo systemctl reload nginx
 
 ========================================================--------------
 26.04.09
+
 정해진시간마다 작업해야할때 cron 사용
 cron:https://crontab.guru/
 
@@ -144,6 +145,8 @@ touch "report_$(date +%Y-%m-%d).txt"
 for item in "${fortune[$((RANDOM%5))]}"; do
     echo $item
 done
+
+=================================================================
 
 
 
