@@ -100,6 +100,173 @@ htop 설치 완료.
  터미널에 htop을 입력해보세요user1@ubuntu01:~$
 
 user1@rocky02 ~]$ sudo yum update -y
+================================================================
+- 26.04.13
+
+# 1. Git 패키지 설치 (root 권한으로 실행)
+ansible all -m package -a "name=git state=present" -b
+
+# 2.git user.name 설정
+[user1@mgmt ~]$ ansible all -m git_config -a "name=user.name value='yim' scope=global" \
+> -b --become-user user1
+git user.email 설정
+[user1@mgmt ~]$ ansible all -m git_config -a "name=user.email value='awosung00@naver.com' scope=global" \
+> -b --become-user user1
+
+# 3 .gitconfig 파일 확인
+[user1@rocky01 ~]$ ls -al
+-rw-r--r--  1 user1 user1   48 Apr 13 10:19 .gitconfig
+[user1@rocky01 ~]$ cat .gitconfig
+[user]
+        name = yim
+        email = awosung00@naver.com
+
+#user1의 홈폴더에있는 .gitconfig 파일 제거하는법
+[user1@mgmt ~]$ ansible all -m file -a "path=~user1/.gitconfig state=absent" -b
+
+#git이 제거되었는지 확인
+[user1@mgmt ~]$ ansible all -a "which git" -b
+[user1@mgmt ansible03]$ vi git_install.yml 
+---
+- name: Git 설치 및 사용자 환경 설정
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: 1. Git 패키지 설치
+      package:
+        name: git
+        state: present
+[user1@mgmt ansible03]$ ansible-playbook ./git_install.yml
+
+git 제거해보기
+[user1@mgmt ansible03]$ ansible-playbook ./remove_git.yml --check
 
 
+git 설치 user.name, user.email 설정 추가
+[user1@mgmt ansible03]$ cat install_git.yml
+---
+- name: Git 설치 및 사용자 환경 설정
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: 1. Git 패키지 설치
+      package:
+        name: git
+        state: present
+    
+    - name: 2. user.name 설정
+      git_config:
+        name: user.name
+        value: "yim jongwon"
+        scope: global
+      become: yes
+      become_user: user1 # user1으로 변신해서 작업하기
+    
+    - name: 3. user.email 설정
+      git_config:
+        name: user.email
+        value: "awosung00@naver.com"
+        scope: global
+      become: yes
+      become_user: user1
+
+git 설정파일 제거
+[user1@mgmt ansible03]$ vi remove_git.yml
+---
+- name: Git 제거하기
+  hosts: all
+  become: yes
+  tasks:
+    - name: 1. Git 삭제 및 미사용 의존성제거
+      package:
+        name: git
+        state: absent
+        autoremove: yes
+    
+    - name: 2. Git 설정파일 제거
+      file:
+        path: ~user1/.gitconfig
+        state: absent
+
+    - name: 3. 만일 제거할 파일이 여러개라면
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "~user1/test1.txt"
+        - "~user1/test2.txt"
+        - "~user1/test3.txt"
+
+설정파일 제거 확인
+[user1@mgmt ansible03]$ ansible-playbook remove_git.yml --check
+
+
+my_hosts.ini파일과 ansible.cfg파일을 이용해서 default inventory를 지정할수있다.
+
+#my_hosts.ini
+[rocky]
+172.16.1.201
+172.16.1.202
+
+[ubuntu]
+172.16.1.203
+
+# ansible.cfg
+[defaults]
+inventory = ./inventories/my_hosts.ini
+
+register: epel_result # 작업의 결과를 epel_result 라는 변수에 담아 오겠다는 의미
+var: epel_result # var 속성에 변수명만 적음, 변수만 가져올때 사용
+msg: "epel_result 변수의 내용 : {{ epel_result }}\
+        , 변경여부 : {{epel_result.changed}}" # msg 속성에 문자열 작성
+
+[user1@mgmt ansible03]$ ansible-playbook var_test3.yml
+---
+- name: 외부 배열 변수 활용 연습
+  hosts: all
+  become: yes
+
+  vars_files:
+    - ./variables/my_list.yml
+
+  tasks:
+    - name: 1. 여러개의 패키지를 한번에 설치
+      package:
+        name: "{{ item }}"
+        state: present
+      loop: "{{target_packages}}"
+    
+    - name: 2. dict 형태의 변수를 참조해서 활용하기
+      debug:
+        msg: |
+            번호 : {{ info.num }}
+            이름 : {{ info.name }}
+            주소 : {{ info.addr }}
+    
+    - name: 3. list 안에 dict가 들어 있는 형태의 데이터 활용하기
+      debug:
+        msg: |
+          번호: {{ item.num }}
+          이름: {{ item.name }}
+          주소: {{ item.addr }}
+      loop: "{{ members }}"
+
+ansible폴더/inventories/my_hosts.ini
+[rocky]                             :그룹
+#호스트이름 ansible_host=아이피주소
+rocky01 ansible_host=172.16.1.201   :ip주소대신 호스트이름 가져온다
+rocky02 ansible_host=172.16.1.202
+
+[ubuntu]
+ubuntu01 ansible_host=172.16.1.203
+
+ansible폴더/ansible.cfg 
+[defaults]
+inventory = ./inventory/my_hosts.ini 
+stdout_callback = yaml                  :형식 yaml(기본 json)
+# addhoc 방식으로 실행했을때도 알아 보기 쉽게(yml)
+bin_ansible_callbacks = True
+        
 '''
