@@ -116,5 +116,9 @@ rocky02    -> 설정 되었으면 비밀번호 안물어보고 나와야한다
 쿠버네티스,도커, k8s ubuntu :apt
 우분투는 root가막혀있어서 sudo로해야한다
 
+# 우분투에서 1. root 전환 및 sudoers 설정
+sudo -i
+
+
 
 '''

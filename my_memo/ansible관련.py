@@ -269,4 +269,204 @@ stdout_callback = yaml                  :형식 yaml(기본 json)
 # addhoc 방식으로 실행했을때도 알아 보기 쉽게(yml)
 bin_ansible_callbacks = True
         
-'''
+
+===========================================================
+26.04.15
+
+- name: Postgre 설치 및 셋업 (Rocky Linux 전용)
+  hosts: postgre_rocky
+  become: yes
+
+  # 환경변수설정 (생성할 db 의 이름, 계정, 비밀번호 등을 제어 합니다)
+  vars:
+    키 : "값"
+
+  tasks:
+    - name: 1. 필수 패키지 설치
+      dnf:
+        name:
+          - postgresql-server # postgre 본체
+          - postgresql-contrib # 확장기능 contribution
+          - python3-psycopg2 # ansible이 DB를 제어하기 위한 라이브러리
+        state: present
+
+    - name: 2. DB 초기화
+      command: postgresql-setup --initdb
+      args:
+        creates: "{{ pg_data_dir }}/PG_VERSION" # 이 파일이 있으면 initdb 를 실행하지 않음
+
+    - name: 3. 외부 접속 허용 (listen_addresses) # 설정정보를 변경하면 db를 restart 해야 적용된다.
+      lineinfile:
+        path: "{{ pg_conf_path }}"
+        regexp: "^#?listen_addresses"
+        line: "listen_addresses = '*'"
+        state: present
+      notify: restart_postgre # restart_postgre 이벤트를 발생시킨다 (변화가 있을때)
+
+    - name: 4. localhost에서 비밀번호로 접속할 수 있게 허용
+      replace:
+        path: "{{ pg_hba_path }}"
+        regexp: '^(host\s+all\s+all\s+(127\.0\.0\.1\/32|::1\/128)\s+)(ident|scram-sha-256|trust|peer)$'
+        replace: '\1md5'
+      notify: restart_postgre # restart_postgre 이벤트
+
+    - name: 5. 외부 아이피 대역 (0.0.0.0/0) md5 접속 허용 룰 추가
+      lineinfile:
+        path: "{{ pg_hba_path }}"
+        line: "host     all      all      0.0.0.0/0      md5"
+        insertafter: EOF # 파일의 맨마지막 다음에 추가 하겠다는 의미
+      notify: restart_postgre # restart_postgre 이벤트
+
+    - name: 6. postgre 서비스 시작 및 재부팅시 자동 실행 설정
+      systemd:
+        name: postgresql
+        state: started
+        enabled: yes
+
+    - name: 7. 사용자 계정 생성 및 비밀번호 부여
+      postgresql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_pass }}"
+      become: yes
+      become_user: postgres # 관리자 계정으로 scott/tiger 계정을 생성한다
+
+   - name: 8. 신규 db 생성 및 소유권 부여
+      postgresql_db:
+        name: "{{ db_name }}"
+        owner: "{{ db_user }}"
+      become: yes
+      become_user: postgres  
+
+    # 설치 직후에는 비밀번호가 설정되어 있지 않아서 비밀번호 접속을 하려면 설정해야 한다.
+    - name: 9. postgres 슈퍼 유저 비밀번호 설정
+      postgresql_user:
+        name: postgres
+        password: "postgres"
+      become: yes
+      become_user: postgres
+
+  # 특정 이벤트가 발생했을때 작업할 내용은 handlers: 에 명시
+  handlers:
+    - name: restart_postgre # 여기에 작성한 이름이 이벤트명이 된다.
+      systemd:
+        name: postgresql
+        state: restart
+
+- 설치후에 확인할 작업
+
+1. 설치된 서버에 들어가서 scott 계정으로 접속되는지 확인 (scott/tiger)
+psql  -U scott -d scott_db  -h localhost
+
+2. postgres 계정으로도 접속되는지 확인
+psql  -U  postgres  -d postgres  -h localhost
+
+3. postgres 로 user 전환해서  psql 입력해 보기
+sudo  su - postgres
+psql
+
+4. dbeaver 실행해서  172.16.8.201  에   postgres, scott 계정으로 접속 되는지  ping 날려보기
+
+
+[user1@rocky01 ~]$ psql --version
+psql (PostgreSQL) 10.23
+
+
+- name: postgre 샘플 데이터 적재 (scott 계정 접속)
+  hosts: postgre_rocky
+  # DB 접속만 하므로 OS 정보 수집을 꺼서 실행 속도를 높입니다.
+  gather_facts: no
+
+  vars:
+    db_name: "scott_db"
+    db_user: "scott"
+    db_pass: "tiger"
+
+  tasks:
+    - name: 1. dept 테이블 생성 (존재 하지 않을때만)
+      postgresql_query:
+        db: "{{ db_name }}"
+        login_user: "{{ db_user }}"
+        login_password: "{{ db_pass }}"
+        login_host: "127.0.0.1"
+        query: |
+          CREATE TABLE IF NOT EXISTS dept(
+          deptno INTEGER PRIMARY KEY,
+          dname VARCHAR(14),
+          loc VARCHAR(13));
+
+    - name: 2. dept 테이블 데이터 insert (실행할때 마다 쌓이지 않게 중복 방지)
+      postgresql_query:
+        db: "{{ db_name }}"
+        login_user: "{{ db_user }}"
+        login_password: "{{ db_pass }}"
+        login_host: "127.0.0.1"
+        query: |
+          INSERT INTO dept
+          (deptno, dname, loc)
+          VALUES
+          (10, 'ACCOUNTING', 'NEW YORK'),
+          (20, 'RESEARCH', 'DALLAS'),
+          (30, 'SALES', 'CHICAGO'),
+          (40, 'OPERATIONS', 'BOSTON')
+          ON CONFLICT (deptno) DO NOTHING;
+
+==========================================================================
+26.04.16
+1. hosts.ini 설정하기
+[postgre_rocky]
+172.16.1.201
+
+[postgre_ubuntu]
+172.16.1.203
+
+[postgre_amazone]
+공인ip
+
+# amazone linux -> ec2-user, ubuntu linux -> ubuntu
+
+2. ec2 인스턴스 서버 생성 및 설정하기
+-amazone linux(ansible08_postgre_amazone)
+ tmp_key.pem(/home/user1/ansible08_postgre_amazone/tmp_key.pem) 가져오기
+
+   ec2_bootstrap.yml 
+----> authorized_key:
+        user: user1
+        state: present
+        key: "{{ lookup('file', '/home/user1/.ssh/ansiblekey.pem.pub') }}"
+        
+  # tmp_key.pem 파일 권한 높으면 에러 발생. 권한 낮추고 실행
+  # chmod 600 ./tmp_key.pem
+
+  # ec2 서버 tmp 개인키가지고 들어가서 ec2_bootstrap.yml 실행하겠다
+  # ansible-playbook ec2_bootstrap.yml --private-key ./tmp_key.pem     
+
+  # postgre_setup.yml db설치
+  # scott_setup.yml 데이터 insert
+  # postgre_remove.yml 제거
+
+-ubuntu linux(ansible08_postgre_amazone_ubuntu)
+ tmp_key.pem(/home/user1/ansible08_postgre_amazone_ubuntu/tmp_key.pem) 가져오기
+
+    ec2_bootstrap.yml 
+----> authorized_key:
+        user: user1
+        state: present
+        key: "{{ lookup('file', '/home/user1/.ssh/ansiblekey.pem.pub') }}"
+        
+  # tmp_key.pem 파일 권한 높으면 에러 발생. 권한 낮추고 실행
+  # chmod 600 ./tmp_key.pem
+
+  # ec2 서버 tmp 개인키가지고 들어가서 ec2_bootstrap.yml 실행하겠다
+  # ansible-playbook ec2_bootstrap.yml --private-key ./tmp_key.pem     
+
+  # postgre_setup.yml db설치
+  # scott_setup.yml 데이터 insert
+
+3. DBeaver로 데이터 확인 후
+  # postgre_remove.yml 제거
+  
+
+galaxy 관련
+[user1@mgmt ansible09_nginx]$ ansible-galaxy install geerlingguy.postgresql
+[user1@mgmt ansible09_nginx]$ ansible-galaxy install geerlingguy.nginx
+ '''
