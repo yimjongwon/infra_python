@@ -147,7 +147,6 @@ for item in "${fortune[$((RANDOM%5))]}"; do
 done
 
 =================================================================
-
-
+# get, post, push, delete, patch 방식이 있다.
 
 '''

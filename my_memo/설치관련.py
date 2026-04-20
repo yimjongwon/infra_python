@@ -78,5 +78,21 @@ sudo systemctl enable nginx
 # 테스트로 실제 80 port 에서 응답하는지 확인 
 curl http://localhost:80
 
+==============================================
+
+26.04.20
+
+# python 가상환경 만들기
+python -m venv venv
+
+# 가상 환경 활성화
+.\venv\Scripts\activate
+
+# 필요한 페키지 설치
+pip install fastapi uvicorn sqlalchemy psycopg2-binary python-jose jinja2 python-multipart
+
+# 실행
+uvicorn main:app --reload
+
 
 '''
