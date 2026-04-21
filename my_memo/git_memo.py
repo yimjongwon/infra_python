@@ -38,4 +38,27 @@ git restore .
 # untracked file 도 제거 하기(한번도 commit 하지 않은 파일일때 쓰인다)
 git clean -fd
 ==============================================================================
+
+feature/기능구현
+fix /기능 복구 (버그 잡기)
+bugfix/xxx
+
+
+1. pull request (merge하는과정)
+2. git pull origin master (내려받고)
+3. git branch -d fix/new_post (branch삭제하기)
+
+ git remote -v : 원격 저장소 목록 확인
+
+깃허브에 ssh 접속하는법
+1.윈도우 cmd
+ssh-keygen -t ed25519 -C "awosung00@naver.com"
+2. 공개키를 깃허브 setting->SSH and GPG keys에 등록한다.
+3. 
+git remote -v :목록확인
+git remote rm origin : 저장소 삭제
+git remote add origin git@github.com:yimjongwon/Fastapi_test03.git: ssh로 추가
+git push origin feature/post_update : 브랜치 정리
+
+
 '''
