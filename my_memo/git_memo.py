@@ -60,5 +60,61 @@ git remote rm origin : 저장소 삭제
 git remote add origin git@github.com:yimjongwon/Fastapi_test03.git: ssh로 추가
 git push origin feature/post_update : 브랜치 정리
 
+저장소 Collaborators가 사용할 수 있는 권한을 제어가능하다.
+깃허브 Settings->Rules->Rulesets
+Add bypass 랑 Target branches가있고
+Branch rules에는 Require a pull request before merging설정을 해야한다.
 
+처음 가져올때는 clone실행할것. 그이후 pull
+
+
+개발된 브랜치를 push하기 전에
+master의 이력을 pull 받은 다음
+개발된 브랜치를 merge해서
+충돌된 부분이 있으면 해결한다음
+개발된 브랜치를 push하고
+pr을 날려야 merge 가능한 상태가 된다
+
+
+작업하던 브랜치에서 
+git add . git commit 
+git switch master
+git pull git@github.com:juhy0987/azas_application_server.git
+git switch feature/기능
+작업하던 브랜치에서 git merge  master 
+
+
+[user1@mgmt terraform]$ git add .
+[user1@mgmt terraform]$ git commit -m "[FEAT]: Route 53 호스팅 영역 및 ACM  인증서 추가"
+[user1@mgmt terraform]$ git branch
+* feature/#11/alb_terraform
+  main
+[user1@mgmt terraform]$ git switch main
+[user1@mgmt terraform]$ git pull origin main
+[user1@mgmt terraform]$ git switch feature/#11/alb_terraform 
+[user1@mgmt terraform]$ git merge main
+[user1@mgmt terraform]$ git push -u origin feature/#11/alb_terraform 
+
+합쳐지면 브랜치삭제
+git branch -d "feature/#11/alb_terraform"
+브랜치 목록확인
+[user1@mgmt terraform]$ git branch -r
+
+
+======================================================
+26.04.29
+[user1@mgmt terraform_example]$ git init
+
+
+[user1@mgmt ~]$ git clone git@github.com:oli999/terraform_example.git terraform_example_teacher
+.terraform.lock.hcl 파일은 삭제하지말기
+terraform init
+한 번에 캐시 삭제하는 마법의 명령어
+find . -name ".terraform" -type d -exec rm -rf {} +
+find .: 현재 폴더(.)부터 하위 폴더를 모두 뒤집니다.
+
+-name ".terraform": 이름이 .terraform인 것을 찾습니다.
+-type d: 파일이 아닌 '디렉토리(폴더)'만 골라냅니다.
+-exec rm -rf {} +: 찾아낸 폴더들을 하나씩 rm -rf 명령어로 삭제합니다.
+df
 '''
