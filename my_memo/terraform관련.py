@@ -264,4 +264,8 @@ terrform.tfvars(default파일)->  variables.tf -> locals -> main.tf
 s3 bucket: index.html
 lambda: python, nodejs, java
 dynamo db: aws가제공하는 db
+
+
+테라폼 파일 깔끔하게 정리:
+terraform fmt
 '''
